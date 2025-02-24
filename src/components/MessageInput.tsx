@@ -1,16 +1,31 @@
 
 import React, { useState } from 'react';
-import { Send, ChevronDown } from 'lucide-react';
+import { Plus, Send, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-const messageTemplates = [
+interface Template {
+  id: number;
+  title: string;
+  content: string;
+}
+
+const defaultTemplates: Template[] = [
   {
     id: 1,
     title: "Professional Introduction",
@@ -31,10 +46,30 @@ const messageTemplates = [
 const MessageInput = () => {
   const [message, setMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [templates, setTemplates] = useState<Template[]>(defaultTemplates);
+  const [newTemplate, setNewTemplate] = useState({ title: "", content: "" });
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleTemplateSelect = (content: string) => {
     setMessage(content);
     toast.success("Template loaded");
+  };
+
+  const handleAddTemplate = () => {
+    if (!newTemplate.title.trim() || !newTemplate.content.trim()) {
+      toast.error("Please fill in both title and content");
+      return;
+    }
+
+    const newTemplateWithId = {
+      ...newTemplate,
+      id: templates.length + 1,
+    };
+
+    setTemplates([...templates, newTemplateWithId]);
+    setNewTemplate({ title: "", content: "" });
+    setIsDialogOpen(false);
+    toast.success("Template added successfully");
   };
 
   const handleSend = async () => {
@@ -74,7 +109,7 @@ const MessageInput = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-[300px]">
-                  {messageTemplates.map((template) => (
+                  {templates.map((template) => (
                     <DropdownMenuItem
                       key={template.id}
                       className="flex flex-col items-start py-2 px-4 cursor-pointer"
@@ -86,6 +121,58 @@ const MessageInput = () => {
                       </span>
                     </DropdownMenuItem>
                   ))}
+                  <DropdownMenuSeparator />
+                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start px-4 py-2 hover:bg-gray-100"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Template
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Add New Template</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Title</label>
+                          <Input
+                            placeholder="Enter template title"
+                            value={newTemplate.title}
+                            onChange={(e) =>
+                              setNewTemplate((prev) => ({
+                                ...prev,
+                                title: e.target.value,
+                              }))
+                            }
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Content</label>
+                          <textarea
+                            className="w-full min-h-[100px] p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                            placeholder="Enter template content"
+                            value={newTemplate.content}
+                            onChange={(e) =>
+                              setNewTemplate((prev) => ({
+                                ...prev,
+                                content: e.target.value,
+                              }))
+                            }
+                          />
+                        </div>
+                        <Button
+                          className="w-full"
+                          onClick={handleAddTemplate}
+                        >
+                          Add Template
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
