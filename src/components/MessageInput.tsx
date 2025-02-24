@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Plus, Send, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
@@ -79,11 +78,32 @@ const MessageInput = () => {
     }
 
     setIsSending(true);
-    // Simulate sending delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    toast.success("Message sent successfully!");
-    setMessage("");
-    setIsSending(false);
+
+    try {
+      // Find LinkedIn's message input and send button
+      const linkedInInput = document.querySelector('.msg-form__contenteditable');
+      const sendButton = document.querySelector('.msg-form__send-button');
+
+      if (!linkedInInput || !sendButton) {
+        throw new Error('LinkedIn message elements not found');
+      }
+
+      // Set the message text in LinkedIn's input
+      const inputEvent = new InputEvent('input', { bubbles: true });
+      linkedInInput.textContent = message;
+      linkedInInput.dispatchEvent(inputEvent);
+
+      // Click LinkedIn's send button
+      sendButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+      toast.success("Message sent successfully!");
+      setMessage("");
+    } catch (error) {
+      toast.error("Failed to send message");
+      console.error('Error sending message:', error);
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (

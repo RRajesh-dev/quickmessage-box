@@ -1,0 +1,17 @@
+
+{
+  "manifest_version": 3,
+  "name": "LinkedIn Message Templates",
+  "version": "1.0",
+  "description": "Save and use message templates on LinkedIn",
+  "permissions": ["storage", "activeTab"],
+  "content_scripts": [
+    {
+      "matches": ["*://*.linkedin.com/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "icons": {
+    "48": "placeholder.svg"
+  }
+}
